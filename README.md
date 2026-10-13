@@ -1,514 +1,650 @@
-# House Price Prediction Using Multiple Linear Regression (Recursive Feature Elimination (RFE) and Backward Elimination.)
+# Housing Price Prediction Using Multiple Linear Regression
+
+## Backward Elimination + Forward Selection and RFE + Backward Elimination
 
 ## 1. Project Overview
 
-The **House Price Prediction** project uses machine learning and statistical techniques to predict the selling price of residential properties based on their characteristics, such as area, number of bedrooms, bathrooms, stories, parking spaces, and other facilities.
+Housing price prediction is a supervised machine learning regression problem in which the objective is to estimate the selling price of a residential property using its structural and categorical characteristics.
 
-The project uses **Multiple Linear Regression** as the prediction model and applies two feature-selection techniques:
+This project uses the `Housing.csv` dataset to develop and evaluate Multiple Linear Regression models using two different feature-selection approaches:
 
-- **Recursive Feature Elimination (RFE)**
-- **Backward Elimination using Ordinary Least Squares (OLS)**
+**Approach 1:** Multiple Linear Regression with Backward Elimination and Forward Selection.
 
-It also performs multicollinearity analysis using the **Variance Inflation Factor (VIF)**, residual analysis, and model evaluation using standard regression metrics.
+**Approach 2:** Multiple Linear Regression with Recursive Feature Elimination (RFE) and Backward Elimination.
 
-The complete implementation is designed to run in **Google Colab**, making it easy to execute without installing Python or configuring a local development environment.
+Both approaches aim to identify relevant predictors, reduce unnecessary features, and build a regression model capable of predicting house prices.
 
-## 2. Objectives
+The project also includes data preprocessing, exploratory data analysis, model evaluation, residual diagnostics, coefficient interpretation, and prediction for new properties.
 
-The main objectives of this project are:
+---
 
-1. To analyze a housing dataset and understand the relationships between housing features and selling prices.
-2. To perform exploratory data analysis (EDA) using statistical summaries and visualizations.
-3. To preprocess numerical and categorical variables for regression analysis.
-4. To build a Multiple Linear Regression model for house price prediction.
-5. To identify important features using Recursive Feature Elimination.
-6. To perform Backward Elimination using statistical significance and p-values.
-7. To analyze multicollinearity using the Variance Inflation Factor.
-8. To evaluate the model using appropriate regression metrics.
-9. To visualize actual versus predicted prices and examine regression residuals.
-10. To create a prediction function that estimates the price of a house from user-provided characteristics.
+## 2. Problem Statement
 
-## 3. Dataset Description
+To develop a Multiple Linear Regression model that predicts the selling price of a residential property based on its available features.
 
-The project uses the `Housing.csv` dataset, which contains information about residential properties and their selling prices.
+The project compares two feature-selection strategies to investigate how different predictor-selection methods affect model complexity, interpretability, and prediction performance.
 
-**Dataset dimensions:** 545 rows and 13 columns.
+The target variable is `price`, while the remaining variables are considered potential predictors.
 
-The dataset contains one target variable and twelve predictor variables.
+---
+
+## 3. Project Objectives
+
+The main objectives are:
+
+- Load and analyse the housing dataset.
+- Perform exploratory data analysis and visualisation.
+- Identify missing values, duplicate records, and data types.
+- Separate the target variable from the input features.
+- Encode categorical variables into numerical representations.
+- Scale numerical predictors where required.
+- Build Multiple Linear Regression models.
+- Apply Backward Elimination using statistical p-values.
+- Apply Forward Selection using Adjusted R².
+- Apply Recursive Feature Elimination (RFE).
+- Combine RFE with Backward Elimination.
+- Compare the two feature-selection approaches.
+- Evaluate model performance using regression metrics.
+- Analyse residuals and multicollinearity.
+- Predict the selling price of a new house.
+
+---
+
+## 4. Dataset Description
+
+The project uses the `Housing.csv` dataset.
+
+The supplied dataset contains 545 records and 13 columns.
 
 ### Dataset attributes
 
-| Attribute | Description | Type |
+| Feature | Description | Data Type |
 |---|---|---|
-| `price` | Selling price of the house | Numerical target |
+| `price` | Selling price of the house | Numerical |
 | `area` | Area of the house | Numerical |
 | `bedrooms` | Number of bedrooms | Numerical |
 | `bathrooms` | Number of bathrooms | Numerical |
 | `stories` | Number of stories | Numerical |
-| `mainroad` | Whether the house is connected to the main road | Categorical |
-| `guestroom` | Whether the house has a guestroom | Categorical |
-| `basement` | Whether the house has a basement | Categorical |
+| `mainroad` | Whether the property has main-road access | Categorical |
+| `guestroom` | Whether the property has a guest room | Categorical |
+| `basement` | Whether the property has a basement | Categorical |
 | `hotwaterheating` | Whether hot-water heating is available | Categorical |
 | `airconditioning` | Whether air conditioning is available | Categorical |
 | `parking` | Number of parking spaces | Numerical |
-| `prefarea` | Whether the house is in a preferred area | Categorical |
-| `furnishingstatus` | Furnishing condition of the house | Categorical |
+| `prefarea` | Whether the property is in a preferred area | Categorical |
+| `furnishingstatus` | Furnishing status of the property | Categorical |
 
-### Target variable
+**Target variable:** `price`
 
-The target variable is `price`.
+**Input features:** The remaining 12 columns.
 
-The model learns the relationship between the housing characteristics and the selling price to estimate prices for previously unseen houses.
+The dataset contains both numerical and categorical predictors. These variables are processed before being used in the regression models.
 
-## 4. Technologies and Libraries Used
+---
 
-The project uses Python and the following libraries:
+## 5. Technologies Used
 
-| Library | Purpose |
+The project uses Python and is designed to run in Google Colab.
+
+| Technology or Library | Purpose |
 |---|---|
 | Python | Main programming language |
-| Pandas | Dataset loading, manipulation, and analysis |
+| Google Colab | Development and execution environment |
+| Pandas | Dataset loading and manipulation |
 | NumPy | Numerical computations |
-| Matplotlib | Data visualization |
-| Seaborn | Statistical visualization |
-| Scikit-learn | Data preprocessing, train-test split, RFE, and evaluation metrics |
-| Statsmodels | OLS regression, p-values, and statistical summaries |
+| Matplotlib | Graph plotting |
+| Seaborn | Statistical data visualisation |
+| Scikit-learn | Data splitting, scaling, RFE, and evaluation metrics |
+| Statsmodels | Ordinary Least Squares regression, p-values, and statistical summaries |
+| SciPy | Statistical analysis and diagnostic plots, where required |
 
-Google Colab provides a convenient environment for running the project.
+### Installation
 
-## 5. Project Workflow
+Google Colab generally provides these libraries by default. For a local Python environment, install the required packages using:
 
-The project follows the workflow below:
+```bash
+pip install pandas numpy matplotlib seaborn scikit-learn statsmodels scipy
+```
 
-1. Import the required libraries.
-2. Load the housing dataset.
-3. Inspect the dataset and check its structure.
-4. Perform exploratory data analysis.
-5. Visualize the distributions and relationships among variables.
-6. Encode categorical variables into numerical representations.
-7. Divide the data into training and testing sets.
-8. Scale selected numerical predictors.
-9. Apply Recursive Feature Elimination.
-10. Perform Backward Elimination using OLS p-values.
-11. Check multicollinearity using VIF.
-12. Fit the final regression model.
-13. Analyze residuals and regression assumptions.
-14. Evaluate the model using test-set predictions.
-15. Display the regression equation and feature coefficients.
-16. Predict the price of a house using new input values.
+---
 
 ## 6. Methodology
 
-### 6.1 Exploratory Data Analysis
+### 6.1 Multiple Linear Regression
 
-Exploratory Data Analysis helps understand the dataset before model development.
+Multiple Linear Regression is a supervised learning algorithm used to predict a continuous numerical target using multiple independent variables.
 
-The project uses:
-
-- Dataset shape and data types.
-- Statistical summaries.
-- Histograms to examine numerical distributions.
-- Pair plots to explore relationships between numerical features.
-- Correlation heatmaps to inspect linear relationships.
-- Box plots to identify possible outliers and unusual distributions.
-
-EDA helps identify patterns and understand how housing characteristics may influence prices.
-
-### 6.2 Data Preprocessing
-
-Data preprocessing converts the original dataset into a format suitable for regression analysis.
-
-**Categorical encoding**
-
-The binary categorical variables are encoded numerically. For example:
-
-- `yes` → 1
-- `no` → 0
-
-The `furnishingstatus` variable is converted into dummy variables using one-hot encoding with a reference category omitted. This avoids creating redundant dummy variables for all categories.
-
-**Training and testing split**
-
-The dataset is divided into:
-
-- Training set: 70%
-- Testing set: 30%
-
-The split uses `random_state=100` for reproducibility.
-
-The training data is used to fit the model, while the testing data is used to evaluate its performance on unseen observations.
-
-**Feature scaling**
-
-Min-Max scaling is applied to selected numerical predictors:
-
-- Area
-- Bedrooms
-- Bathrooms
-- Stories
-- Parking
-
-The scaler is fitted using the training data and then applied to the testing data. This prevents information from the test set from influencing the scaling parameters.
-
-The target variable, `price`, remains unscaled.
-
-### 6.3 Multiple Linear Regression
-
-Multiple Linear Regression estimates a continuous target variable using multiple independent variables.
-
-The general equation is:
+The general regression equation is:
 
 \[
-Y=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_nX_n+\epsilon
+\hat{y}=\beta_0+\beta_1x_1+\beta_2x_2+\cdots+\beta_px_p
 \]
 
 Where:
 
-- \(Y\) = predicted house price
-- \(\beta_0\) = intercept
-- \(\beta_i\) = regression coefficient for predictor \(X_i\)
-- \(X_i\) = housing feature
-- \(n\) = number of predictors
-- \(\epsilon\) = error term
+- \(\hat{y}\) is the predicted house price.
+- \(\beta_0\) is the intercept.
+- \(x_1,x_2,\ldots,x_p\) are the selected input features.
+- \(\beta_1,\beta_2,\ldots,\beta_p\) are the regression coefficients.
+- \(p\) is the number of selected predictors.
 
-The model estimates the relationship between the selected housing features and the selling price.
+The regression coefficients estimate the relationship between each predictor and the target, holding the other included predictors constant.
 
-### 6.4 Recursive Feature Elimination (RFE)
+### 6.2 Data Preprocessing
 
-Recursive Feature Elimination is a feature-selection technique available in Scikit-learn.
+Before training the regression models, the dataset undergoes preprocessing.
 
-It repeatedly trains an estimator, ranks the features according to their importance, and removes less important features until the desired number remains.
+The main steps are:
 
-In this project, RFE is used to select a subset of potentially useful predictors before statistical feature selection.
+1. Load the dataset from `Housing.csv`.
+2. Inspect the dataset structure and descriptive statistics.
+3. Check for missing values and duplicate records.
+4. Separate `price` from the independent variables.
+5. Split the dataset into training and testing sets.
+6. Identify numerical and categorical features.
+7. Apply one-hot encoding to categorical features.
+8. Scale numerical predictors where required.
+9. Ensure the training and testing datasets contain matching feature columns.
 
-**Purpose:**
+The scaler and other preprocessing transformations should be fitted on the training data only. The same fitted transformations are then applied to the test data to prevent data leakage.
 
-- Reduce the number of predictors.
-- Identify potentially important variables.
-- Simplify the regression model.
-- Reduce the influence of less useful features.
+### 6.3 Categorical Encoding
 
-RFE is a feature-selection method; it does not independently guarantee that every selected feature is statistically significant.
+Regression models require numerical input.
 
-### 6.5 Backward Elimination Using OLS
+Categorical variables such as `mainroad`, `guestroom`, `airconditioning`, and `furnishingstatus` are converted into numerical indicator columns using one-hot encoding.
 
-Backward Elimination is a statistical feature-selection technique that starts with a set of candidate predictors and removes variables that do not satisfy a chosen significance criterion.
+Using `drop_first=True` removes one reference category from each encoded categorical group, helping avoid perfect multicollinearity among the full set of indicator columns.
 
-The project uses Ordinary Least Squares (OLS) regression from Statsmodels.
+### 6.4 Approach 1: Backward Elimination and Forward Selection
+
+This approach combines two feature-selection techniques.
+
+#### A. Backward Elimination
+
+Backward Elimination begins with all available candidate predictors.
 
 The procedure is:
 
-1. Fit an OLS regression model using the current predictors.
-2. Examine the p-value of each predictor.
+1. Fit a Multiple Linear Regression model.
+2. Obtain the p-value for each predictor from the fitted OLS model.
 3. Identify the predictor with the highest p-value.
-4. Remove that predictor if its p-value exceeds 0.05.
-5. Refit the model using the remaining predictors.
-6. Repeat until the remaining predictors satisfy the selected p-value criterion or the procedure reaches its stopping condition.
+4. If its p-value exceeds the selected significance threshold, remove that predictor.
+5. Refit the regression model.
+6. Repeat until the stopping criterion is met.
 
-The significance level is:
+The project uses a significance level of:
 
 \[
 \alpha=0.05
 \]
 
-A p-value below 0.05 is treated as evidence of statistical significance under the model's assumptions.
+A predictor with a p-value greater than 0.05 is considered for removal under this procedure.
 
-**Important:** Statistical significance does not necessarily mean that a feature has a large practical effect on house prices. Likewise, removing a feature based on its p-value can affect the interpretation and predictive performance of the model.
+**Advantages:**
 
-### 6.6 Multicollinearity Analysis Using VIF
+- Uses statistical significance to assess individual regression coefficients.
+- Starts with the complete candidate feature set.
+- Can produce a simpler and more interpretable regression model.
 
-Multicollinearity occurs when two or more independent variables are strongly related to one another.
+**Limitations:**
 
-It can make regression coefficients unstable and complicate the interpretation of individual feature effects.
+- Results may depend on the sample and the relationships between predictors.
+- P-values can be affected by multicollinearity and model assumptions.
+- Statistical significance does not necessarily imply practical importance.
 
-The project uses the Variance Inflation Factor (VIF) to identify possible multicollinearity.
+#### B. Forward Selection
 
-The formula is:
+Forward Selection starts with an empty set of predictors.
+
+The procedure is:
+
+1. Begin with no predictors in the model.
+2. Evaluate the candidate predictors individually or in combination with those already selected.
+3. Add the predictor that gives the best improvement according to the selected criterion.
+4. Recalculate the criterion after adding the predictor.
+5. Continue until no remaining predictor meets the stopping rule.
+
+This project uses Adjusted R² as the selection criterion.
+
+Adjusted R² measures model fit while accounting for the number of predictors. Unlike ordinary R², it can decrease when a newly added predictor does not improve the model sufficiently.
+
+**Advantages:**
+
+- Builds the model gradually.
+- Can reduce the number of unnecessary predictors.
+- Uses Adjusted R² to account for model complexity.
+
+**Limitations:**
+
+- Results can depend on the order in which predictors are considered.
+- Greedy selection does not guarantee the globally best feature subset.
+- A selected predictor may become less useful after other predictors are added.
+
+#### C. Model selection for Approach 1
+
+The feature subsets produced by Backward Elimination and Forward Selection are compared according to the rule implemented in the Python code.
+
+The selected candidate is subsequently evaluated on the held-out test set.
+
+For rigorous evaluation, feature selection and model-choice decisions should be made using training data or cross-validation, not by repeatedly tuning against the final test set.
+
+### 6.5 Approach 2: Recursive Feature Elimination (RFE) and Backward Elimination
+
+This approach combines Recursive Feature Elimination with statistical Backward Elimination.
+
+#### A. Recursive Feature Elimination (RFE)
+
+RFE is a wrapper-based feature-selection technique. It repeatedly trains an estimator and removes the least important predictor according to the estimator's coefficients or feature-importance scores.
+
+For this project, RFE can use a linear regression estimator.
+
+The procedure is:
+
+1. Start with the candidate predictor set.
+2. Fit the selected regression estimator.
+3. Rank the predictors using the estimator's coefficient magnitudes or feature-importance values.
+4. Remove the least important predictor or predictors.
+5. Refit the estimator using the remaining predictors.
+6. Repeat until the specified number of predictors remains.
+
+The number of features retained is controlled by the RFE configuration.
+
+**Advantages:**
+
+- Can reduce a large predictor set systematically.
+- Uses the fitted estimator to rank feature usefulness.
+- Can be integrated into a machine-learning pipeline.
+
+**Limitations:**
+
+- The result depends on the chosen estimator and number of retained features.
+- Coefficient-based rankings can be affected by feature scaling.
+- RFE does not directly use statistical p-values to rank predictors.
+
+#### B. Backward Elimination after RFE
+
+After RFE selects a smaller subset of predictors, Backward Elimination is applied to the reduced feature set.
+
+The procedure is:
+
+1. Perform RFE using the training predictors and target.
+2. Retain the predictors selected by RFE.
+3. Fit an OLS regression model using those predictors.
+4. Examine the predictors' p-values.
+5. Remove the predictor with the highest p-value if it exceeds the significance threshold.
+6. Refit the model and repeat.
+7. Evaluate the final model using the held-out test set.
+
+This combines two different selection criteria:
+
+- **RFE:** ranks predictors using the fitted estimator's coefficients or feature-importance values.
+- **Backward Elimination:** removes predictors using OLS p-values.
+
+The final predictor set may therefore differ from the subset obtained using Approach 1.
+
+### 6.6 Comparison of the Two Approaches
+
+| Aspect | Approach 1 | Approach 2 |
+|---|---|---|
+| Project method | Backward Elimination + Forward Selection | RFE + Backward Elimination |
+| Initial selection strategy | Forward Selection starts empty; Backward Elimination starts with candidate predictors | RFE reduces the feature set first |
+| Primary selection criteria | p-values and Adjusted R² | Estimator-based feature ranking and p-values |
+| Statistical p-values | Used in Backward Elimination | Used in the final Backward Elimination stage |
+| Feature ranking by estimator coefficients | Not required for Forward Selection | Used by coefficient-based RFE |
+| Main purpose | Compare stepwise statistical selection procedures | Combine estimator-based ranking with statistical elimination |
+
+Neither approach is guaranteed to perform better in every dataset. Their performance depends on the data, preprocessing, feature-selection settings, and validation procedure.
+
+---
+
+## 7. Project Workflow
+
+### Workflow A: Backward Elimination + Forward Selection
+
+```text
+Start
+  |
+  v
+Load Housing.csv
+  |
+  v
+Inspect and explore the dataset
+  |
+  v
+Separate predictors and target
+  |
+  v
+Split into training and test sets
+  |
+  v
+Encode categorical variables
+  |
+  v
+Scale numerical predictors
+  |
+  v
+Fit Multiple Linear Regression
+  |
+  +-----------------------------+
+  |                             |
+  v                             v
+Backward Elimination       Forward Selection
+  |                             |
+  +--------------+--------------+
+                 |
+                 v
+       Compare selected models
+                 |
+                 v
+       Evaluate on test data
+                 |
+                 v
+       Analyse residuals
+                 |
+                 v
+       Predict house prices
+```
+
+### Workflow B: RFE + Backward Elimination
+
+```text
+Start
+  |
+  v
+Load Housing.csv
+  |
+  v
+Inspect and explore the dataset
+  |
+  v
+Separate predictors and target
+  |
+  v
+Split into training and test sets
+  |
+  v
+Encode categorical variables
+  |
+  v
+Scale numerical predictors
+  |
+  v
+Apply RFE to training data
+  |
+  v
+Retain RFE-selected predictors
+  |
+  v
+Fit OLS regression model
+  |
+  v
+Apply Backward Elimination
+  |
+  v
+Evaluate final model on test data
+  |
+  v
+Analyse residuals
+  |
+  v
+Predict house prices
+```
+
+Both workflows should use the same train/test split and compatible preprocessing when comparing their results.
+
+---
+
+## 8. How to Run the Project in Google Colab
+
+### Step 1: Open Google Colab
+
+Visit [Google Colab](https://colab.research.google.com/) and create a new notebook.
+
+### Step 2: Upload the dataset
+
+Upload `Housing.csv` to your Colab session.
+
+If the Python code includes an upload prompt, select the dataset when requested.
+
+### Step 3: Copy the Python code
+
+Paste the complete Python implementation into the notebook.
+
+For the first approach, run the code containing Backward Elimination and Forward Selection.
+
+For the second approach, include the RFE stage followed by Backward Elimination and the separate evaluation section.
+
+### Step 4: Execute the notebook
+
+Run the cells in order, or select **Runtime → Run all**.
+
+### Step 5: Review the output
+
+Review the dataset summary, selected features, OLS summaries, evaluation metrics, diagnostic graphs, and predicted prices.
+
+### Step 6: Save the results
+
+Download any required CSV outputs or graphs from the Colab file panel.
+
+---
+
+## 9. Exploratory Data Analysis
+
+Exploratory Data Analysis (EDA) helps understand the structure and distribution of the dataset before modelling.
+
+The project may include:
+
+- Dataset preview.
+- Dataset shape and data types.
+- Descriptive statistics.
+- Missing-value analysis.
+- Duplicate-record analysis.
+- Distribution of house prices.
+- Distribution of numerical predictors.
+- Correlation analysis.
+- Scatter plots showing relationships between predictors and price.
+- Box plots to inspect possible outliers.
+
+EDA helps identify data-quality issues and understand the relationships that may influence the regression model.
+
+---
+
+## 10. Model Evaluation
+
+Both approaches should be evaluated on the same held-out test set.
+
+### A. R² Score
+
+R² measures how much of the variation in the target is explained by the model on the evaluated dataset.
+
+Higher test R² generally indicates a better fit, but it does not prove that the model is appropriate or that its predictions are unbiased.
+
+### B. Adjusted R²
+
+Adjusted R² accounts for the number of predictors in the model. It is useful when comparing models with different numbers of predictors fitted to the same observations.
+
+### C. Mean Absolute Error (MAE)
 
 \[
-VIF_i=\frac{1}{1-R_i^2}
+MAE=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|
 \]
 
-Where \(R_i^2\) is obtained by regressing predictor \(i\) against the other predictors.
-
-A VIF value near 1 indicates little linear dependence on the other predictors. Larger values indicate increasing multicollinearity.
-
-The implementation uses a threshold of 5 as a screening rule. Predictors exceeding this threshold may be removed iteratively, followed by refitting the regression model.
-
-VIF thresholds are guidelines rather than universal rules. Removing variables solely to reduce VIF should be considered alongside statistical reasoning and predictive performance.
-
-### 6.7 Final Regression Model
-
-After feature selection and multicollinearity checks, the remaining predictors are used to fit the final OLS regression model.
-
-The final model provides:
-
-- Estimated regression coefficients.
-- An intercept.
-- P-values and other statistical information.
-- Predicted house prices.
-
-The exact predictors and coefficients depend on the dataset and the feature-selection results produced during execution.
-
-## 7. Model Evaluation
-
-The model is evaluated on the test dataset using the following regression metrics.
-
-### 7.1 R-squared (R²)
-
-R-squared measures the proportion of variation in the target variable explained by the model relative to a baseline that predicts the mean target value.
-
-\[
-R^2=1-\frac{\sum(y_i-\hat y_i)^2}
-{\sum(y_i-\bar y)^2}
-\]
-
-A higher test-set R² generally indicates better explanatory performance relative to this baseline. However, it does not guarantee that the model will perform equally well on other datasets.
-
-### 7.2 Mean Absolute Error (MAE)
-
-MAE measures the average absolute difference between actual and predicted prices.
-
-\[
-MAE=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat y_i|
-\]
+MAE measures the average absolute difference between actual and predicted house prices.
 
 A lower MAE indicates smaller average absolute prediction errors.
 
-### 7.3 Mean Squared Error (MSE)
-
-MSE measures the average squared prediction error.
+### D. Root Mean Squared Error (RMSE)
 
 \[
-MSE=\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat y_i)^2
+RMSE=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}
 \]
 
-Because errors are squared, larger errors receive a greater penalty.
+RMSE gives greater weight to large prediction errors because the errors are squared before averaging.
 
-### 7.4 Root Mean Squared Error (RMSE)
+A lower RMSE generally indicates better prediction accuracy on the evaluated dataset.
 
-RMSE is the square root of MSE.
+### E. Model Comparison Table
+
+Fill this table with the actual values printed by your Python notebook.
+
+| Evaluation Measure | Approach 1: Backward Elimination + Forward Selection | Approach 2: RFE + Backward Elimination |
+|---|---|---|
+| Number of selected predictors | Actual output | Actual output |
+| Test R² | Actual output | Actual output |
+| Test Adjusted R² | Actual output, if calculated | Actual output, if calculated |
+| Test MAE | Actual output | Actual output |
+| Test RMSE | Actual output | Actual output |
+
+Do not enter assumed or invented results. The actual metrics depend on the data, train/test split, and model settings.
+
+---
+
+## 11. Residual Analysis and Diagnostics
+
+A residual is the difference between an observed price and the model's predicted price.
 
 \[
-RMSE=\sqrt{MSE}
+e_i=y_i-\hat{y}_i
 \]
 
-RMSE is expressed in the same units as the target variable and is more sensitive to large prediction errors than MAE.
+Residual analysis helps determine whether the model's errors show systematic patterns.
 
-**Interpretation:** Lower MAE, MSE, and RMSE generally indicate more accurate predictions on the evaluated dataset. R² should be considered alongside these error metrics rather than in isolation.
+The project may use the following diagnostics:
 
-## 8. Residual Diagnostics
+- **Residuals versus fitted values:** checks for visible patterns and changes in residual spread.
+- **Residual histogram:** examines the shape of the residual distribution.
+- **Normal Q–Q plot:** compares residual quantiles with normal-distribution quantiles.
+- **Residuals versus predictors:** helps identify possible non-linear patterns.
+- **Durbin–Watson statistic:** assesses residual autocorrelation in an appropriate observation order.
+- **Variance Inflation Factor (VIF):** investigates multicollinearity among predictors.
 
-Residuals are the differences between actual and predicted values.
+These diagnostics help assess the suitability of the regression model. They do not guarantee that every modelling assumption is satisfied.
 
-\[
-e_i=y_i-\hat y_i
-\]
+---
 
-The project generates visualizations to inspect model errors.
+## 12. Predicting the Price of a New House
 
-### Residual histogram
+After selecting and fitting a final model, the project can predict the selling price of a new property.
 
-Shows the distribution of residuals and helps assess whether the errors are approximately symmetric and centered near zero.
-
-### Residuals versus fitted values
-
-Helps identify systematic patterns, changing error variance, and possible model misspecification.
-
-### Normal Q-Q plot
-
-Compares residual quantiles with theoretical normal quantiles to examine whether the residual distribution is approximately normal.
-
-These plots support diagnostic assessment but do not, by themselves, prove that all regression assumptions are satisfied.
-
-## 9. Feature Coefficients and Explainability
-
-The final model displays the estimated coefficients of the selected predictors.
-
-A coefficient represents the estimated change in predicted price associated with a one-unit increase in that predictor, holding the other predictors constant.
-
-Because some numerical predictors are scaled, their coefficients correspond to changes in the scaled values rather than directly to one original unit of area, bedrooms, bathrooms, stories, or parking.
-
-For categorical dummy variables, a coefficient represents the estimated difference relative to the omitted reference category, holding the other predictors constant.
-
-The project also visualizes the coefficients to make the model easier to interpret.
-
-**Note:** Regression coefficients indicate associations learned from the dataset. They should not automatically be interpreted as causal effects.
-
-## 10. House Price Prediction Calculator
-
-The project includes a prediction function named `predict_house_price()`.
-
-The function accepts housing characteristics, such as:
+The prediction function should accept the required property attributes:
 
 - Area
 - Number of bedrooms
 - Number of bathrooms
 - Number of stories
 - Main-road access
-- Guestroom availability
+- Guest-room availability
 - Basement availability
-- Hot-water heating availability
+- Hot-water heating
 - Air-conditioning availability
 - Number of parking spaces
 - Preferred-area status
 - Furnishing status
 
-The function applies the required encoding and scaling transformations before passing the input to the trained regression model.
+The function must apply the same categorical encoding, scaling, and selected feature columns used during training.
 
-It then returns the estimated house price.
+The resulting value is an estimated selling price based on the relationships learned from the dataset. It is not a guaranteed valuation or a live real-estate market quote.
 
-The function uses the preprocessing objects and selected features produced during model training, so the prediction input must be processed consistently with the final model.
+---
 
-The predicted value is an estimate, not a guaranteed market selling price.
+## 13. Expected Project Outputs
 
-## 11. How to Run the Project in Google Colab
+Depending on the Python implementation, the notebook may produce:
 
-### Step 1: Open Google Colab
+1. Dataset preview and descriptive statistics.
+2. Exploratory visualisations.
+3. Initial Multiple Linear Regression summary.
+4. Features retained by Backward Elimination.
+5. Features retained by Forward Selection.
+6. Features selected by RFE.
+7. Final features retained by RFE followed by Backward Elimination.
+8. Regression coefficients and p-values.
+9. VIF table.
+10. Test-set R², Adjusted R², MAE, and RMSE.
+11. Actual-versus-predicted plots.
+12. Residual diagnostic plots.
+13. Example house-price predictions.
+14. Exported CSV files, if enabled in the code.
 
-Visit:
+The exact feature lists and numerical results must be taken from the actual notebook execution.
 
-https://colab.research.google.com/
+---
 
-Create a new notebook.
+## 14. Important Implementation Considerations
 
-### Step 2: Upload the dataset
+- **Both approaches require separate implementations.** A README that documents RFE does not automatically add RFE to the Python notebook.
+- **Use a consistent train/test split.** This makes comparison between the two approaches more meaningful.
+- **Avoid data leakage.** Fit preprocessing tools and feature selectors using training data only.
+- **Keep categorical encoding consistent.** New-house inputs must use the same encoding rules as the training dataset.
+- **Scale predictors appropriately.** Coefficient-based RFE can be sensitive to differences in feature scales.
+- **Understand the selection criteria.** Backward Elimination uses p-values, Forward Selection uses the chosen improvement criterion, and RFE uses estimator-based ranking.
+- **Avoid tuning against the final test set.** Use cross-validation or training-only validation for model-selection decisions.
+- **Interpret p-values cautiously.** They depend on statistical assumptions and should not be treated as direct measures of practical importance.
+- **Check multicollinearity.** Highly correlated predictors may make coefficient estimates unstable.
+- **Do not assume causation.** Regression coefficients describe estimated relationships in the model, not necessarily causal effects.
+- **Report actual metrics.** Use the outputs generated by your own run rather than expected or invented scores.
 
-Make sure the dataset is named:
-
-`Housing.csv`
-
-If the code includes an automatic upload prompt, run the cell and upload the CSV file when requested.
-
-Otherwise, upload the file through Colab's Files panel or modify the file path in the code.
-
-### Step 3: Copy the Python code
-
-Copy the complete project code into a single Colab code cell, as provided in the project implementation.
-
-### Step 4: Execute the cell
-
-Run the cell and allow the program to complete each stage.
-
-The notebook should generate the data visualizations, feature-selection results, regression diagnostics, evaluation metrics, coefficient information, and example price prediction.
-
-### Step 5: Review the results
-
-Examine:
-
-- The selected features.
-- The final OLS regression summary.
-- VIF values.
-- Test-set R², MAE, MSE, and RMSE.
-- Actual versus predicted prices.
-- Residual diagnostic plots.
-- The final regression equation.
-- The example house price prediction.
-
-The numerical results are generated at runtime and are not fixed in this README.
-
-## 12. Running the Project Locally
-
-To run the project on a local computer, install Python and the required libraries.
-
-Install the dependencies using:
-
-```bash
-pip install pandas numpy matplotlib seaborn scikit-learn statsmodels
-```
-
-Save the Python implementation and `Housing.csv` in an accessible location.
-
-Update the dataset path in the code if necessary, then run the script or execute the notebook in Jupyter.
-
-Google Colab is the recommended option for users who do not want to configure a local Python environment.
-
-## 13. Project Structure
-
-A suggested repository structure is:
-
-```text
-house-price-prediction/
-│
-├── Housing.csv
-├── README.md
-├── house_price_prediction.ipynb
-└── requirements.txt
-```
-
-- `Housing.csv` — housing dataset used for training and evaluation.
-- `README.md` — project documentation.
-- `house_price_prediction.ipynb` — notebook containing the implementation, visualizations, model training, evaluation, and prediction function.
-- `requirements.txt` — list of Python library dependencies.
-
-Example `requirements.txt`:
-
-```text
-pandas
-numpy
-matplotlib
-seaborn
-scikit-learn
-statsmodels
-```
-
-The filenames are suggested organization; use the actual filenames in your repository.
-
-## 14. Advantages
-
-- Uses multiple housing characteristics for price prediction.
-- Includes exploratory data analysis and visualization.
-- Applies feature selection to simplify the model.
-- Uses statistical significance testing through OLS.
-- Examines multicollinearity using VIF.
-- Evaluates predictions using multiple regression metrics.
-- Includes residual diagnostics.
-- Provides an input-based house price prediction function.
-- Can be executed in Google Colab with minimal setup.
+---
 
 ## 15. Limitations
 
-- The model depends on the quality and representativeness of the available dataset.
-- Linear Regression may not capture complex nonlinear relationships between housing characteristics and prices.
-- Feature selection can change with different train-test splits and datasets.
-- P-values and VIF values depend on the predictors included in the model and the assumptions of the statistical analysis.
-- The dataset may not represent current real-estate market conditions.
-- The model does not automatically account for all potentially important factors, such as exact location, nearby amenities, market demand, interest rates, or changes in economic conditions.
-- Performance on the test split does not guarantee performance on future properties.
+The project has several limitations:
+
+- The model assumes that the relationship between the predictors and house price is adequately represented by a linear form.
+- The dataset may not include all factors affecting property prices, such as exact location, building age, local market demand, or changes over time.
+- Outliers and data-quality problems can influence the fitted regression model.
+- Multicollinearity can affect the stability and interpretation of coefficients.
+- Stepwise selection methods can be sensitive to the sample and the candidate predictors.
+- RFE results depend on the estimator, feature scaling, and selected feature count.
+- A model trained on one housing market may not generalise well to another market.
+- Strong performance on one test split does not guarantee performance on future data.
+
+---
 
 ## 16. Future Improvements
 
 Possible extensions include:
 
-1. Comparing Multiple Linear Regression with Ridge and Lasso Regression.
-2. Comparing the model with Random Forest Regression and Gradient Boosting.
-3. Using cross-validation for more reliable model evaluation.
-4. Performing hyperparameter tuning for alternative models.
-5. Adding more location-specific and market-related features.
-6. Creating an interactive prediction interface using Streamlit.
-7. Evaluating prediction errors across different price ranges.
-8. Saving the trained model and preprocessing objects for later use.
-9. Comparing RFE-only, Backward Elimination-only, and combined feature-selection approaches.
-
-## 17. Conclusion
-
-This project demonstrates a complete regression workflow for housing price prediction, from dataset exploration and preprocessing to feature selection, model fitting, statistical diagnostics, and performance evaluation.
-
-It combines **Multiple Linear Regression, Recursive Feature Elimination, Backward Elimination, and VIF analysis** to investigate which housing characteristics are useful for predicting selling prices.
-
-The final prediction function demonstrates how a trained regression model can be used to estimate the price of a house from its characteristics.
-
-The project is intended for educational purposes and demonstrates the practical application of machine learning and statistical regression techniques. Its predictions should not be treated as professional property valuations.
-
-## 18. Author
-
-**Project:** House Price Prediction Using Multiple Linear Regression  
-**Domain:** Machine Learning / Data Science  
-**Language:** Python  
-**Environment:** Google Colab / Jupyter Notebook  
-**Dataset:** Housing.csv
+- Use cross-validation to compare feature-selection methods more robustly.
+- Tune the number of RFE-selected features using training-only validation.
+- Build preprocessing and modelling pipelines.
+- Compare Multiple Linear Regression with Ridge, Lasso, Elastic Net, Decision Tree, Random Forest, and Gradient Boosting models.
+- Investigate non-linear transformations where residual diagnostics suggest they are needed.
+- Analyse influential observations and potential outliers.
+- Add reliable property and market information if available.
+- Save the fitted preprocessing transformations and final model for repeatable predictions.
+- Evaluate the model on a separate dataset from the intended deployment market.
 
 ---
 
-*Disclaimer: This is an educational machine-learning project. Predictions are estimates based on the dataset and model assumptions, not guaranteed real-estate valuations.*
+## 17. Conclusion
 
+This project demonstrates how Multiple Linear Regression can be used to estimate residential property prices from structural and categorical characteristics.
+
+It documents and compares two feature-selection approaches:
+
+1. **Backward Elimination + Forward Selection**, which combines p-value-based elimination with incremental feature selection using Adjusted R².
+2. **Recursive Feature Elimination (RFE) + Backward Elimination**, which first ranks and removes predictors using an estimator and then applies statistical p-value-based elimination.
+
+Comparing the approaches helps illustrate how different feature-selection criteria produce different predictor sets and potentially different prediction performance.
+
+The final model should be chosen using appropriate validation, held-out test metrics, residual diagnostics, and an understanding of the dataset's limitations.
+
+---
+
+## 18. Project Summary
+
+| Item | Description |
+|---|---|
+| Project title | Housing Price Prediction Using Multiple Linear Regression |
+| Problem type | Supervised regression |
+| Dataset | `Housing.csv` |
+| Target variable | `price` |
+| Regression model | Multiple Linear Regression / Ordinary Least Squares |
+| Approach 1 | Backward Elimination + Forward Selection |
+| Approach 2 | Recursive Feature Elimination (RFE) + Backward Elimination |
+| Feature-selection criteria | p-values, Adjusted R², and estimator-based feature ranking |
+| Evaluation metrics | R², Adjusted R², MAE, RMSE |
+| Programming language | Python |
+| Development environment | Google Colab |
