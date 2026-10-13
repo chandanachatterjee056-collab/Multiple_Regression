@@ -1,4 +1,4 @@
-# House Price Prediction Using Multiple Linear Regression
+# House Price Prediction Using Multiple Linear Regression (Recursive Feature Elimination (RFE) and Backward Elimination.)
 
 ## 1. Project Overview
 
